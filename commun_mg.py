@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import folium
+import json
+from folium import Choropleth
 import matplotlib.pyplot as plt
 
 #chargement du dataset
@@ -95,14 +98,14 @@ eff_art_f_21 = df_tot_art_f_21.sum()
 df_tot_art_g_21 = df_art_garcons_21.sum()
 eff_art_g_21 = df_tot_art_g_21.sum()
 
-print('nb de filles ayant choisi une spé littéraire en 2021: ', eff_lit_f)
-print('nb de garçons ayant choisi une spé littéraire en 2021: ', eff_lit_g)
-print('nb de filles ayant choisi une spé socio économique en 2021: ', eff_eco_f)
-print('nb de garçons ayant choisi une spé socio économique en 2021: ', eff_eco_g)
-print('nb de filles ayant choisi une spé scinetifique en 2021: ',eff_scient_f)
-print('nb de garçons ayant choisi une spé scientifique en 2021: ',eff_scient_g)
-print('nb de filles ayant choisi une spé artistique en 2021: ',eff_art_f)
-print('nb de garçons ayant choisi une artistique en 2021: ',eff_art_g)
+print('nb de filles ayant choisi une spé littéraire en 2021: ', eff_lit_f_21)
+print('nb de garçons ayant choisi une spé littéraire en 2021: ', eff_lit_g_21)
+print('nb de filles ayant choisi une spé socio économique en 2021: ', eff_eco_f_21)
+print('nb de garçons ayant choisi une spé socio économique en 2021: ', eff_eco_g_21)
+print('nb de filles ayant choisi une spé scinetifique en 2021: ',eff_scient_f_21)
+print('nb de garçons ayant choisi une spé scientifique en 2021: ',eff_scient_g_21)
+print('nb de filles ayant choisi une spé artistique en 2021: ',eff_art_f_21)
+print('nb de garçons ayant choisi une artistique en 2021: ',eff_art_g_21)
 
 #2022
 #filtrage des colonnes correspondant aux différentes filières 
@@ -287,6 +290,142 @@ tableau_effectif_g = pd.pivot_table(df_g, values='effectifs', index='année', co
 tableau_effectif_f = pd.pivot_table(df_f, values='effectifs', index='année', columns='filières', fill_value=0)
 print("\033[1mEFFECITF DE GARCONS AYANT CHOISI UNE DES SPECIALITES APPARTENANT AUX DIFFERENTES FILIERES PAR ANNEE\033[0m")
 tableau_effectif_g
+# +
+#comparaison entre lycée privé et lycée public
+
+#filtrage des lycées
+df_prive = df[df['SECTEUR'] == 'PRIVE SOUS CONTRAT']
+df_public = df[df['SECTEUR'] == 'PUBLIC']
+
+#filtrage des années
+df_prive_21 = df_prive[df_prive['RENTREE SCOLAIRE'] == 2021]
+df_prive_22 = df_prive[df_prive['RENTREE SCOLAIRE'] == 2022]
+df_prive_23 = df_prive[df_prive['RENTREE SCOLAIRE'] == 2023]
+df_public_21 = df_public[df_public['RENTREE SCOLAIRE'] == 2021]
+df_public_22 = df_public[df_public['RENTREE SCOLAIRE'] == 2022]
+df_prive_23 = df_public[df_public['RENTREE SCOLAIRE'] == 2023]
+
+
+#proportion d'élèves dans le privé
+eff_tot_prive_21 = df_prive_21['EFFECTIF TOTAL'].sum()
+eff_tot_prive_22 = df_prive_22['EFFECTIF TOTAL'].sum()
+eff_tot_prive_23 = df_prive_23['EFFECTIF TOTAL'].sum()
+prop_prive_21 =  round(eff_tot_prive_21/eff_tot_2021, 2)
+prop_prive_22 = round(eff_tot_prive_22/eff_tot_2022, 2)
+prop_prive_23 =  round(eff_tot_prive_23/eff_tot_2023, 2)
+print("La propotion d'élèves dans le privé en 2021 est de", prop_prive_21)
+print("La propotion d'élèves dans le privé en 2022 est de", prop_prive_22)
+print("La propotion d'élèves dans le privé en 2023 est de", prop_prive_23)
+
+
+# +
+#tracé de l'évolution de la proportion d'élèves dans le privé
+# Définir les coordonnées des points
+x = [2021, 2022, 2023]
+y = [prop_prive_21, prop_prive_22, prop_prive_23]
+y_min = 0
+y_max = 1
+
+# Tracer le graphique
+plt.plot(x, y, '-o', label="Proportion")
+plt.xlabel("Axe X")
+plt.xticks([2021, 2022, 2023])
+plt.ylabel("Axe Y")
+plt.title("Evolution de la proportion d'élèves dans le privé")
+plt.ylim(y_min, y_max) 
+plt.legend()
+plt.show()
+
+# +
+#tracés de l'évolution des proportions de filles et de garçons dans le privé
+
+eff_f_prive_21 = df_prive_21['EFFECTIF TOTAL FILLES'].sum()
+eff_g_prive_21 = df_prive_21['EFFECTIF TOTAL GARCONS'].sum()
+eff_f_prive_22 = df_prive_22['EFFECTIF TOTAL FILLES'].sum()
+eff_g_prive_22 = df_prive_22['EFFECTIF TOTAL GARCONS'].sum()
+eff_f_prive_23 = df_prive_23['EFFECTIF TOTAL FILLES'].sum()
+eff_g_prive_23 = df_prive_23['EFFECTIF TOTAL GARCONS'].sum()
+
+prop_f_prive_21 = round(eff_f_prive_21/eff_tot_prive_21, 2)
+prop_g_prive_21 = round(eff_g_prive_21/eff_tot_prive_21, 2)
+prop_f_prive_22 = round(eff_f_prive_22/eff_tot_prive_22, 2)
+prop_g_prive_22 = round(eff_g_prive_22/eff_tot_prive_22, 2)
+prop_f_prive_23 = round(eff_f_prive_23/eff_tot_prive_23, 2)
+prop_g_prive_23 = round(eff_g_prive_21/eff_tot_prive_23, 2)
+
+# Définir les coordonnées des points pour les deux graphiques
+x = [2021, 2022, 2023]
+y1 = [prop_f_prive_21, prop_f_prive_22, prop_f_prive_23]
+y2 = [prop_g_prive_21, prop_g_prive_22, prop_g_prive_23]
+
+# Créer une figure et une grille de sous-graphiques 1x2
+plt.figure(figsize=(10, 4))
+y_min = 0
+y_max = 1
+
+# Premier graphique
+plt.subplot(1, 2, 1)  # 1 ligne, 2 colonnes, 1er graphique
+plt.plot(x, y1, '-o', label="proportion filles")
+plt.xlabel("Année")
+plt.ylabel("Proportion")
+plt.title("Evolution de la proportion de filles dans le privé")
+plt.xticks([2021, 2022, 2023])
+plt.ylim(y_min, y_max) 
+plt.legend()
+
+# Deuxième graphique
+plt.subplot(1, 2, 2)  # 1 ligne, 2 colonnes, 2e graphique
+plt.plot(x, y2, '-o', label="proportion garçons", color="orange")
+plt.xlabel("Année")
+plt.ylabel("Proportion")
+plt.title("Evolution de la proportion de garçons dans le privé")
+plt.xticks([2021, 2022, 2023])
+plt.ylim(y_min, y_max) 
+plt.legend()
+
+# Afficher la figure
+plt.tight_layout()
+plt.show()
+
+# +
+#ETUDE DES TRIPLETTES
+
+#détermination de la triplette la plus choisie par département et affichage sur une carte de France
+# liste des départements
+liste_dep = df_2021['code département'].unique()
+print(liste_dep)
+# -
+
+print(df.dtypes.head(10))
+
+# +
+# Identifier les colonnes contenant les triplettes pour les filles et les garçons
+triplette_cols_f = df.iloc[:, 55::2] 
+triplette_cols_g = df.iloc[:, 56::2]
+
+# Créer un dictionnaire pour stocker la triplette la plus populaire par département
+triplette_populaire_par_departement_f = {}
+triplette_populaire_par_departement_g = {}
+
+# Parcourir les départements de la liste
+for dep in liste_dep:
+    # Filtrer le DataFrame pour le département actuel
+    df_2021_dep = df_2021[df_2021['code département'] == dep]
+    
+    # Calculer la somme des effectifs pour chaque triplette
+    effectifs_par_triplette_f = df_2021_dep[triplette_cols_f].sum()
+    effectifs_par_triplette_g = df_2021_dep[triplette_cols_g].sum()
+    
+    # Trouver la triplette avec l'effectif maximum
+    triplette_populaire_f = effectifs_par_triplette_f.idxmax()
+    triplette_populaire_g = effectifs_par_triplette_g.idxmax()
+    
+    # Stocker le résultat dans le dictionnaire
+    triplette_populaire_par_departement_f[dep] = triplette_populaire_f
+    triplette_populaire_par_departement_g[dep] = triplette_populaire_g
+
+# Afficher les triplette populaires pour chaque départemen
+triplette_populaire_par_departement_f
 # -
 
 
