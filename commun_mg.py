@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
-import folium
-import json
-from folium import Choropleth
+import geopandas as gpd
 import matplotlib.pyplot as plt
 
 #chargement du dataset
@@ -398,11 +396,12 @@ print(liste_dep)
 
 print(df.dtypes.head(10))
 
-# +
 # Identifier les colonnes contenant les triplettes pour les filles et les garçons
 triplette_cols_f = df.iloc[:, 55::2] 
 triplette_cols_g = df.iloc[:, 56::2]
-
+liste_triplette_f = triplette_cols_f.columns.tolist()
+liste_triplette_g = triplette_cols_g.columns.tolist()
+# +
 # Créer un dictionnaire pour stocker la triplette la plus populaire par département
 triplette_populaire_par_departement_f = {}
 triplette_populaire_par_departement_g = {}
@@ -411,21 +410,42 @@ triplette_populaire_par_departement_g = {}
 for dep in liste_dep:
     # Filtrer le DataFrame pour le département actuel
     df_2021_dep = df_2021[df_2021['code département'] == dep]
-    
+    eff_max_f = 0
+    triplette_max_f = None
+    eff_max_g = 0
+    triplette_max_g = None
     # Calculer la somme des effectifs pour chaque triplette
-    effectifs_par_triplette_f = df_2021_dep[triplette_cols_f].sum()
-    effectifs_par_triplette_g = df_2021_dep[triplette_cols_g].sum()
-    
-    # Trouver la triplette avec l'effectif maximum
-    triplette_populaire_f = effectifs_par_triplette_f.idxmax()
-    triplette_populaire_g = effectifs_par_triplette_g.idxmax()
-    
-    # Stocker le résultat dans le dictionnaire
-    triplette_populaire_par_departement_f[dep] = triplette_populaire_f
-    triplette_populaire_par_departement_g[dep] = triplette_populaire_g
+    for triplette in liste_triplette_f:
+        eff = df_2021_dep[triplette].sum()
+        if eff > eff_max_f:
+            eff_max_f = eff
+            triplette_max_f = triplette
 
-# Afficher les triplette populaires pour chaque départemen
-triplette_populaire_par_departement_f
+    for triplette in liste_triplette_g:
+        eff = df_2021_dep[triplette].sum()
+        if eff > eff_max_g:
+            eff_max_g = eff
+            triplette_max_g = triplette
+    # Stocker le résultat dans le dictionnaire
+    triplette_populaire_par_departement_f[dep] = triplette_max_f
+    triplette_populaire_par_departement_g[dep] = triplette_max_g
+
+# Afficher les triplette populaires pour chaque département
+triplette_populaire_par_departement_g
+# +
+valeurs_df = pd.DataFrame(list(triplette_populaire_par_departement_f.items()), columns=['code_departement', 'triplette fav'])
+departements = gpd.read_file('contour-des-departements.geojson')
+# Fusionner les données géographiques avec les valeurs
+departements = departements.merge(valeurs_df, left_on='code_insee', right_on='code_departement', how='left')
+
+# Tracer la carte avec des couleurs en fonction des valeurs
+fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+departements.plot(column='triplette', cmap='viridis', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+
+# Afficher la carte
+plt.title("Carte des départements colorée par valeur")
+plt.show()
 # -
+
 
 
