@@ -81,6 +81,52 @@ plt.plot(df2.columns, valeurs)
 plt.pie(valeurs, labels = df2.columns)
 plt.show()
 
+# +
+#ETUDE DES TRIPLETTES
 
+#détermination de la triplette la plus choisie par département et affichage sur une carte de France
+# liste des départements
+liste_dep = df_2021['code département'].unique()
+print(liste_dep)
+# -
 
+# Identifier les colonnes contenant les triplettes pour les filles et les garçons
+triplette_cols_f = df.iloc[:, 55::2] 
+triplette_cols_g = df.iloc[:, 56::2]
+liste_triplette_f = triplette_cols_f.columns.tolist()
+liste_triplette_g = triplette_cols_g.columns.tolist()
 
+# +
+# Créer un dictionnaire pour stocker la triplette la plus populaire par département
+triplette_populaire_par_departement_f = {}
+triplette_populaire_par_departement_g = {}
+
+# Parcourir les départements de la liste
+for dep in liste_dep:
+    # Filtrer le DataFrame pour le département actuel
+    df_2021_dep = df_2021[df_2021['code département'] == dep]
+    eff_max_f = 0
+    triplette_max_f = None
+    eff_max_g = 0
+    triplette_max_g = None
+    # Calculer la somme des effectifs pour chaque triplette
+    for triplette in liste_triplette_f:
+        eff = df_2021_dep[triplette].sum()
+        if eff > eff_max_f:
+            eff_max_f = eff
+            triplette_max_f = triplette
+
+    for triplette in liste_triplette_g:
+        eff = df_2021_dep[triplette].sum()
+        if eff > eff_max_g:
+            eff_max_g = eff
+            triplette_max_g = triplette
+    # Stocker le résultat dans le dictionnaire
+    triplette_populaire_par_departement_f[dep] = triplette_max_f
+    triplette_populaire_par_departement_g[dep] = triplette_max_g
+
+# Afficher les triplette populaires pour chaque département
+triplette_populaire_par_departement_g
+# -
+
+triplette_populaire_par_departement_f
