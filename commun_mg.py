@@ -86,7 +86,7 @@ eff_eco_g_21 = df_tot_eco_g_21.sum()
 #effectif des filles en scientifique
 df_tot_scient_f_21 = df_scient_filles_21.sum()
 eff_scient_f_21 = df_tot_scient_f_21.sum()
-#effetif des garcons en scientifique
+#effectif des garcons en scientifique
 df_tot_scient_g_21 = df_scient_garcons_21.sum()
 eff_scient_g_21 = df_tot_scient_g_21.sum()
 #effectif des filles en art
