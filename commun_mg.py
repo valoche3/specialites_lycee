@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import geopandas as gpd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 #chargement du dataset
@@ -16,7 +17,7 @@ print(df.describe())
 # +
 #calcul de l'effectif total (mixte, fille, garcon) sur la france chaque année
 #2021
-print("\033[1meffectifs 2021\033[0m")
+print("\033[1mEffectifs 2021\033[0m")
 df_2021 = df[df['RENTREE SCOLAIRE'] == 2021]
 eff_tot_2021 = df_2021['EFFECTIF TOTAL'].sum()
 print("l'effectif total en 2021 est de", eff_tot_2021, 'eleves')
@@ -27,7 +28,7 @@ print("l'effectif total masculin en 2021 est de", eff_garcons_2021, 'eleves')
 print('')
 
 #2022
-print("\033[1meffectifs 2022\033[0m")
+print("\033[1mEffectifs 2022\033[0m")
 df_2022 = df[df['RENTREE SCOLAIRE'] == 2022]
 eff_tot_2022 = df_2022['EFFECTIF TOTAL'].sum()
 print("l'effectif total en 2022 est de", eff_tot_2022, 'eleves')
@@ -38,7 +39,7 @@ print("l'effectif total masculin en 2022 est de", eff_garcons_2022, 'eleves')
 print('')
 
 #2023
-print("\033[1meffectifs 2023\033[0m")
+print("\033[1mEffectifs 2023\033[0m")
 df_2023 = df[df['RENTREE SCOLAIRE'] == 2023]
 eff_tot_2023 = df_2023['EFFECTIF TOTAL'].sum()
 print("l'effectif total en 2023 est de", eff_tot_2023, 'eleves')
@@ -317,6 +318,10 @@ print("La propotion d'élèves dans le privé en 2023 est de", prop_prive_23)
 
 
 # +
+#la proportion d'élèves dans le privé en 2023 ne semble pas très cohérente avec les deux autres valeurs
+#il se peut qu'il y ait des valeurs aberrantes dans le dataframe 
+
+# +
 #tracé de l'évolution de la proportion d'élèves dans le privé
 # Définir les coordonnées des points
 x = [2021, 2022, 2023]
@@ -326,9 +331,9 @@ y_max = 1
 
 # Tracer le graphique
 plt.plot(x, y, '-o', label="Proportion")
-plt.xlabel("Axe X")
+plt.xlabel("Année")
 plt.xticks([2021, 2022, 2023])
-plt.ylabel("Axe Y")
+plt.ylabel("Proportion")
 plt.title("Evolution de la proportion d'élèves dans le privé")
 plt.ylim(y_min, y_max) 
 plt.legend()
@@ -432,20 +437,121 @@ for dep in liste_dep:
 
 # Afficher les triplette populaires pour chaque département
 triplette_populaire_par_departement_g
+# -
+triplette_populaire_par_departement_f
 # +
-valeurs_df = pd.DataFrame(list(triplette_populaire_par_departement_f.items()), columns=['code_departement', 'triplette fav'])
-departements = gpd.read_file('contour-des-departements.geojson')
-# Fusionner les données géographiques avec les valeurs
-departements = departements.merge(valeurs_df, left_on='code_insee', right_on='code_departement', how='left')
+spe_cols_f = df.iloc[:, 17::2]
+spe_cols_g = df.iloc[:, 18::2]
 
-# Tracer la carte avec des couleurs en fonction des valeurs
-fig, ax = plt.subplots(1, 1, figsize=(10, 10))
-departements.plot(column='triplette', cmap='viridis', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
+liste_spe_f = spe_cols_f.columns.tolist()
+liste_spe_g = spe_cols_g.columns.tolist()
 
-# Afficher la carte
-plt.title("Carte des départements colorée par valeur")
+# Créer un dictionnaire pour stocker la triplette la plus populaire par département
+spe_populaire_par_departement_f = {}
+spe_populaire_par_departement_g = {}
+
+# Parcourir les départements de la liste
+for dep in liste_dep:
+    # Filtrer le DataFrame pour le département actuel
+    df_2021_dep = df_2021[df_2021['code département'] == dep]
+    eff_max_f = 0
+    spe_max_f = None
+    eff_max_g = 0
+    spe_max_g = None
+    # Calculer la somme des effectifs pour chaque triplette
+    for spe in liste_spe_f:
+        eff = df_2021_dep[spe].sum()
+        if eff > eff_max_f:
+            eff_max_f = eff
+            spe_max_f = spe
+
+    for spe in liste_spe_g:
+        eff = df_2021_dep[spe].sum()
+        if eff > eff_max_g:
+            eff_max_g = eff
+            spe_max_g = spe
+    # Stocker le résultat dans le dictionnaire
+    spe_populaire_par_departement_f[dep] = spe_max_f
+    spe_populaire_par_departement_g[dep] = spe_max_g
+
+# Afficher les triplette populaires pour chaque département
+spe_populaire_par_departement_f
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# Ajouter une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# Ajouter un titre
+plt.title("Spécialité la plus choisie parmi les filles par département", fontsize=16)
+plt.show()
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_g)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# Ajouter une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# Ajouter un titre
+plt.title("Spécialité la plus choisie parmi les filles par département", fontsize=16)
 plt.show()
 # -
-
 
 
