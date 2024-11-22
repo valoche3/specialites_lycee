@@ -14,7 +14,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 #chargement du dataset
-df = pd.read_csv("fr-en-effectifs-specialites-triplettes-1ere-generale.csv", delimiter=';')
+df = pd.read_csv("dataset.csv", delimiter=';')
 
 # Convertir les colonnes de type objet en type numérique si nécessaire:
 df['EFFECTIF TOTAL'] = pd.to_numeric(df['EFFECTIF TOTAL'], errors='coerce')
