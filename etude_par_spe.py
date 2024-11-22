@@ -1,8 +1,11 @@
 # # ETUDE DU CHOIX DE SPECIALITES PAR LES ELEVES DE PREMIERE EN FRANCE EN 2021, 2022, 2023
 
-# A travers cette analyse de données sur les choix de spécialités en première tirées du site data.gouv, nous allons mener une étude comparative afin de mettre en lumière des tendances, des caractéristiques sur ces choix des triplettes
+# A travers cette analyse de données sur les choix de spécialités en première tirées du site data.gouv, nous allons mener une étude comparative afin de mettre en lumière des tendances, des caractéristiques sur ces choix des différentes spécialités
 #
-# Nous allons notamment nous pencher sur des comparaisons entre filles et garçons, mais aussi entre lycée public et privé et en fonction du département étudié
+# On s'intéresse ici à la première partie du dataframe qui repertorie les effectifs par spécialité individuelle et non par triplette (cf deuxieme notebook pour l'étude du choix des triplettes) 
+#
+# Nous allons notamment nous pencher sur des comparaisons entre filles et garçons, mais aussi entre lycée public et privé et enfin en fonction du département étudié
+#
 
 import pandas as pd
 import numpy as np
@@ -191,6 +194,9 @@ eff_art_f_23 = df_tot_art_f_23.sum()
 #effectif des garcons en art
 df_tot_art_g_23 = df_art_garcons_23.sum()
 eff_art_g_23 = df_tot_art_g_23.sum()
+# -
+# On va maintenant représenter ces résultats sous forme de diagramme pour plus de visibilité
+
 # +
 #affichage sous forme d'un diagramme baton le nombres de filles et de garçons ayant choisi des matières de filière différentes
 
@@ -274,7 +280,7 @@ ax2.set_ylim(y_min, y_max)
 plt.tight_layout() 
 plt.show()
 # -
-# On constate que le nombre de filles en littéraire et en éco est bien supérieur à celui des garçons, tandis que les garçons ont plus tendance à choisir des spécilaités scientifiques
+# On constate que le nombre de filles en littéraire et en éco est bien supérieur à celui des garçons, tandis que les garçons ont plus tendance à choisir des spécialités scientifiques
 
 # +
 #afficher un tableau à double entrée avec les années et les filières pour les filles et les garçons
@@ -305,7 +311,7 @@ tableau_effectif_f = pd.pivot_table(df_f, values='effectifs', index='année', co
 print("\033[1mEFFECITF DE GARCONS AYANT CHOISI UNE DES SPECIALITES APPARTENANT AUX DIFFERENTES FILIERES PAR ANNEE\033[0m")
 tableau_effectif_g
 # -
-# ## Etude du choix des specialités en fonction du secteur
+# ## Etude du choix des specialités en fonction du secteur (privé/public)
 
 # +
 #comparaison entre lycée privé et lycée public
@@ -410,7 +416,10 @@ plt.show()
 
 # ## Etude du choix des specialités par département
 
-# On va essayer ici de représenter la spécialité la plus choisie parmi les filles et les garçons par département sous forme d'une carte de France avec chaque département de la couleur de la spécialité la plus choisie
+# On va essayer ici de représenter la spécialité la plus choisie par les filles et les garçons par département sous forme d'une carte de France avec chaque département de la couleur de la spécialité la plus choisie
+
+#création d'une liste avec tous les numéros de départements présents dans le dataframe
+liste_dep = df['code département'].unique().tolist()
 
 # ### EN 2021
 
@@ -454,12 +463,12 @@ for dep in liste_dep:
     spe_populaire_par_departement_g_2021[dep] = spe_max_g
 
 # Afficher les spécialités populaires pour chaque département
-spe_populaire_par_departement_f
+spe_populaire_par_departement_f_2021
 # -
 
 # On utilise ensuite une carte geojson et on associe les clés et le numéro de département pour colorer la carte
 
-# ### AFFICHAGE POUR LES FILLES
+# ### 2021 : AFFICHAGE POUR LES FILLES
 
 # +
 # Charger les données géographiques des départements français
@@ -500,7 +509,7 @@ plt.title("Spécialité la plus choisie parmi les filles par département en 202
 plt.show()
 # -
 
-# ### AFFICHAGE POUR LES GARCONS
+# ### 2021 : AFFICHAGE POUR LES GARCONS
 
 # +
 # Charger les données géographiques des départements français
@@ -573,49 +582,7 @@ for dep in liste_dep:
 # -
 
 
-# ### AFFICHAGE POUR LES FILLES
-
-# +
-# Charger les données géographiques des départements français
-url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
-departments = gpd.read_file(url)
-departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
-
-# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
-departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f_2022)
-
-# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
-departments['specialty'] = departments['specialty'].fillna('Inconnu')
-
-# Associer une couleur unique à chaque spécialité
-unique_specialties = departments['specialty'].unique()
-# Utiliser une palette qualitative de Seaborn
-palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
-color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
-
-# Ajouter une couleur par défaut pour "Inconnu"
-color_map['Inconnu'] = 'lightgrey'
-
-# Ajouter une colonne de couleurs
-departments['color'] = departments['specialty'].map(color_map)
-
-# Tracer la carte
-fig, ax = plt.subplots(1, 1, figsize=(15, 15))
-departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
-departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
-
-# on ajoute une légende
-for specialty, color in color_map.items():
-    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
-ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
-
-# on ajoute un titre
-plt.title("Spécialité la plus choisie parmi les filles par département en 2021", fontsize=16)
-plt.show()
-# -
-
-
-# ### AFFICHAGE POUR LES GARCONS
+# ### 2022 : AFFICHAGE POUR LES FILLES
 
 # +
 # Charger les données géographiques des départements français
@@ -654,6 +621,10 @@ ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10,
 # on ajoute un titre
 plt.title("Spécialité la plus choisie parmi les filles par département en 2022", fontsize=16)
 plt.show()
+# -
+
+
+# ### 2022 : AFFICHAGE POUR LES GARCONS
 
 # +
 # Charger les données géographiques des départements français
@@ -808,8 +779,10 @@ plt.title("Spécialité la plus choisie parmi les garçons par département en 2
 plt.show()
 # -
 
-# On constate à travers ces cartes que chaque année les garçons choissisent en majorité la spécialité mathématiques, tandis que bien que la majorité des filles choissisent aussi cette spécilaité, c'est un peu plus varié puisque qu'elles sont nombreuses à choisir SES ou SVT. 
+# On constate à travers ces cartes que chaque année les garçons choissisent en majorité la spécialité mathématiques, tandis que bien que la majorité des filles choissisent aussi cette spécilaité, c'est un peu plus varié puisque qu'elles sont nombreuses à choisir SES, SVT ou autre matière moins "science dure". 
 
-# # A travers cette étude, on constate que les spécialités scientifiques sont encore majoritairement choisies par les garçons tandis que les filles sont plus orientées vers des spécialités littéraires ou économiques. Il semble donc important de promouvoir les spécialités scientifiques dans ces classes là pour les filles ainsi que les spécialités littéraires pour les garçons afin de rééquilibrer les effectifs dans chaque filière. 
+# ### A travers cette étude, on constate que les spécialités scientifiques sont encore majoritairement choisies par les garçons tandis que plus de filles vont s'orienter vers des spécialités littéraires ou économiques. 
+#
+# ### Il semble donc important de promouvoir les spécialités scientifiques dans ces classes là pour les filles ainsi que les spécialités littéraires pour les garçons afin de rééquilibrer les effectifs dans chaque filière. 
 
 
