@@ -13,5 +13,5 @@ Cela a effectivement révélé de vraies tendances notamment chez les filles et 
 
 Cette étude est composée de deux notebooks : 
 - Le premier, nommé etude_par_spe, se penche sur les choix specialité par spécialité
-- Le deuxième, nommé etude_par_triplette, se concentre sur les choix par triplette
+- Le deuxième, nommé etude_par_triplette, se concentre sur les choix triplette par triplette
 <!-- #endregion -->
