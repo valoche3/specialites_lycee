@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 # +
 #charger le dataset
 
-df = pd.read_csv("fr-en-effectifs-specialites-triplettes-1ere-generale.csv", delimiter=';')  # Ajustez le délimiteur si nécessaire
+df = pd.read_csv("dataset.csv", delimiter=';')  # Ajustez le délimiteur si nécessaire
 
 #afficher les premières lignes et les informations générales
 
