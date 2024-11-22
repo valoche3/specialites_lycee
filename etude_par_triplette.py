@@ -1,34 +1,43 @@
+# # ÉTUDE DU CHOIX DES TRIPLETTES PAR LES ÉLÈVES DE PREMIÈRE EN FRANCE EN 2021, 2022 et 2023
+
+# Dans ce notebook, on étudie grâce aux données gouvernementales la répartition du choix des triplettes par les élèves de première en France sur les rentrées 2021, 2022 et 2023. Nous allons d'abord déterminer les fréquences de choix de chacune des triplettes pour ces trois années, puis la proportion de filles et de garçons dans chacune de ces triplettes en moyenne sur les trois années.
+
+# Le but de cette étude est d'alors de mettre en lumière des différences sociétales quant aux choix de triplettes plus scientifiques, plus littéraires ou plus économiques, ainsi que la discrimination genrée pour chacune des triplettes.
+
+# ## Étude des triplettes les plus choisies
+
+# Nous allons tout d'abord créer de nouveaux dataframes afin de cibler les informations dont nous avons besoin pour répondre à la question des triplettes les plus choisies en 2021, 2022 et 2023.
+
 # +
+#import des librairies utiles
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Charger le dataset
+# +
+#charger le dataset
+
 df = pd.read_csv("fr-en-effectifs-specialites-triplettes-1ere-generale.csv", delimiter=';')  # Ajustez le délimiteur si nécessaire
 
-# Afficher les premières lignes et les informations générales
-#print(df.head())
-#print(df.info())
+#afficher les premières lignes et les informations générales
 
-# Vérifier les valeurs manquantes
-#print(df.isnull().sum())
-
-#df.describe()
-# -
-
-# Convertir les colonnes de type objet en type numérique si nécessaire
-# Par exemple, si une colonne 'Effectifs' est en texte, on la convertit :
-df['EFFECTIF TOTAL'] = pd.to_numeric(df['EFFECTIF TOTAL'], errors='coerce')
+display(df.head())
+df.describe()
 
 # +
-#calcul des triplettes les moins choisies en tout
+#convertir les colonnes de type objet en type numérique si nécessaire
 
-#on cherche les colonnes que l'on veut enlever
-#print(df.columns)
+df['EFFECTIF TOTAL'] = pd.to_numeric(df['EFFECTIF TOTAL'], errors='coerce')
+# -
 
-#on enlève les colonnes correspondant qu'à une spécialité
+# Pour rendre notre dataframe plus lisible, notre premier but est de supprimer toutes les colonnes dont nous n'allons pas avoir besoin pour notre étude (colonne correspondant qu'à une spécialité et non à une triplette).
+
+# +
+#enlever les colonnes correspondant qu'à une spécialité
+
 i = 17 
-L = []
+L = [] #liste contenant les indices des colonnes à supprimer
 while i <= 54 : 
     L.append(i)
     i+=1
@@ -36,79 +45,94 @@ while i <= 54 :
 df = df.drop(df.columns[L], axis = 1)
 df = df.drop(columns = ['1087 - EDUC.PHYSIQUE PRATIQUE & CULT.SPORTIVE - filles',
        '1087 - EDUC.PHYSIQUE PRATIQUE & CULT.SPORTIVE - garçons'], axis = 1)
-#df.head(5)
+
+#vérification
+
+df.head(5)
+# -
+# Nous allons ensuite procéder à l'étude des fréquences de choix de chaque triplette pour les années 2021, 2022 et 2023.
+
+# ### 2021
+
 # +
-#on garde que la rentrée 2021
+#créer un dataframe rentrée 2021
 
 df_2021 = df[df['RENTREE SCOLAIRE'] == 2021]
 
 
 # +
-#on garde que les effectifs
+#garder que les colonnes utiles (effectifs)
 
 df_2021 = df_2021.loc[:,'EFFECTIF TOTAL':]
-df_2021
 
 # +
-#on additionne les valeurs sur la totalité de la rentrée 2021
+#somme sur tous les lycées de la rentrée 2021
 
-display(df_2021.sum(axis = 0).to_frame().T)
-df_2021.iloc[0,0]
+df_2021 = df_2021.sum(axis = 0).to_frame().T
+# -
+
+# On crée ensuite un nouveau dataframe qui somme les effectifs filles et garçons pour chaque spécialité. En effet, dans cette première partie d'étude, on ne s'intéresse pas à la répartition selon le genre (mais seulement sur l'effectif total).
 
 # +
-#création du nouveau dataframe qui va accueillir les sommes pour les filles et les garçons
-df_2021bis = df_2021.iloc[:,:1].copy()
+#créer un nouveau dataframe
+
+df_2021bis = df_2021.iloc[:,:1].copy() #garder que la colonne EFFECTIF TOTAL
 
 #calcul des sommes et remplissage du nouveau dataframe
+
 i = 3
 while i < 40 : 
-    nom = df_2021.columns[i].replace(" - filles", "")
+    nom = df_2021.columns[i].replace(" - filles", "") #nouveaux noms des colonnes
     df_2021bis[nom] = df_2021[[df_2021.columns[i], df_2021.columns[i+1]]].sum(axis = 1)
     i += 2
+    
+#vérification
+
 df_2021bis
+# -
+
+# La dernière étape consiste à calculer la proportion d'élèves dans chaque triplette par rapport à l'effectif total.
 
 # +
-#df_2021bis = df_2021bis.drop(['EFFECTIF TOTAL'], axis = 1)
+#calcul des fréquences
 
 serie_2021 = df_2021bis.sum(axis = 0)
 valeurs_2021 = serie_2021.tolist()
 frequences_2021 = [x/valeurs_2021[0] for x in valeurs_2021]
 # -
 
-# Après avoir étudié pour l'année 2021, on va faire les mêmes diagrammes pour l'année 2022 et l'année 2023 pour essayer d'observer des changements en 3 ans de nouvelle réforme du baccalauréat.
+# Après avoir étudié l'année 2021, on va faire les mêmes opérations pour l'année 2022 et l'année 2023 afin d'observer les changements sur 3 ans de la nouvelle réforme du baccalauréat.
+
+# ### 2022
 
 # +
-#année 2022
-
-df_2022 = df[df['RENTREE SCOLAIRE'] == 2022]
+df_2022 = df[df['RENTREE SCOLAIRE'] == 2022] #créer un dataframe rentrée 2022
 df_2022 = df_2022.loc[:,'EFFECTIF TOTAL':]
 
 df_2022.sum(axis = 0).to_frame().T
 
-df_2022bis = df_2022.iloc[:,:1].copy()
+df_2022bis = df_2022.iloc[:,:1].copy() #créer un nouveau dataframe
 
 i = 3
 while i < 40 : 
     nom = df_2022.columns[i].replace(" - filles", "")
     df_2022bis[nom] = df_2022[[df_2022.columns[i], df_2022.columns[i+1]]].sum(axis = 1)
     i += 2
-    
-#df_2022bis = df_2022bis.drop(['EFFECTIF TOTAL'], axis = 1)
 
 serie_2022 = df_2022bis.sum(axis = 0)
 valeurs_2022 = serie_2022.tolist()
 frequences_2022 = [x/valeurs_2022[0] for x in valeurs_2022]
-print(frequences_2022)
+# -
+
+# ### 2023
 
 # +
-#année 2023
-
-df_2023 = df[df['RENTREE SCOLAIRE'] == 2023]
+df_2023 = df[df['RENTREE SCOLAIRE'] == 2023] #créer un dataframe rentrée 2023
 df_2023 = df_2023.loc[:,'EFFECTIF TOTAL':]
 
-#df_2023.sum(axis = 0).to_frame().T
+df_2023.sum(axis = 0).to_frame().T
 
-df_2023bis = df_2023.iloc[:,:1].copy()
+df_2023bis = df_2023.iloc[:,:1].copy() #créer un nouveau dataframe
 
 i = 3
 while i < 40 : 
@@ -116,17 +140,18 @@ while i < 40 :
     df_2023bis[nom] = df_2023[[df_2023.columns[i], df_2023.columns[i+1]]].sum(axis = 1)
     i += 2
 
-#df_2023bis = df_2023bis.drop(['EFFECTIF TOTAL'], axis = 1)
-
 serie_2023 = df_2023bis.sum(axis = 0)
 valeurs_2023 = serie_2023.tolist()
 frequences_2023 = [x/valeurs_2023[0] for x in valeurs_2023]
-print(frequences_2023)
 # -
+
+# ### Affichage des résultats
 
 # Maintenant que nous avons étudié les triplettes les plus choisies pour les 3 années, on va pouvoir afficher les histogrammes et les camemberts pour chacune de ces années.
 
-#définition des labels pour mieux voir
+# +
+#définition des labels
+
 labels = {
     '01 - MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE' : 1,
     '02 - HIST.-GEO. GEOPOLITIQUE & SC.POLITIQUES/LANGUES, LITT. ET CULTURES ETRA. ET R./SCIENCES ECONOMIQUES ET SOCIALES' : 2,
@@ -152,14 +177,13 @@ labels = {
 # +
 #tracer de l'histogramme de l'année 2021
 
-plt.bar(df_2021bis.columns[1:], frequences_2021[1:])
+plt.bar(df_2021bis.columns[1:], frequences_2021[1:]) #on enlève la première valeur correspondant à EFFECTIF TOTAL
 plt.xlabel('Triplette')
 plt.ylabel('Fréquence')
 plt.title('Fréquence de la triplette choisie en 2021')
 plt.xticks(df_2021bis.columns[1:], [labels[x] for x in df_2021bis.columns[1:]])
 plt.show()
 
-# +
 #tracer de l'histogramme de l'année 2022
 
 plt.bar(df_2022bis.columns[1:], frequences_2022[1:])
@@ -177,6 +201,8 @@ plt.ylabel('Fréquence')
 plt.title('Fréquence de la triplette choisie en 2023')
 plt.xticks(df_2023bis.columns[1:], [labels[x] for x in df_2023bis.columns[1:]])
 plt.show()
+
+#afficher la légende
 
 print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
     '2 : HIST.-GEO. GEOPOLITIQUE & SC.POLITIQUES/LANGUES, LITT. ET CULTURES ETRA. ET R./SCIENCES ECONOMIQUES ET SOCIALES',
@@ -200,23 +226,25 @@ print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
       sep = '\n')
 
 # +
-#tracer du camembert pour 2021
+#tracer du camembert pour l'année 2021
 
 plt.pie(frequences_2021[1:], labels = [labels[x] for x in df_2021bis.columns[1:]], startangle = 40)
 plt.title("Répartition du choix des triplettes pour l'année 2021")
 plt.show()
 
-#tracer du camembert pour 2022
+#tracer du camembert pour l'année 2022
 
 plt.pie(frequences_2022[1:], labels = [labels[x] for x in df_2022bis.columns[1:]], startangle = 40)
 plt.title("Répartition du choix des triplettes pour l'année 2022")
 plt.show()
 
-#tracer du camembert pour 2023
+#tracer du camembert pour l'année 2023
 
 plt.pie(frequences_2023[1:], labels = [labels[x] for x in df_2023bis.columns[1:]], startangle = 40)
 plt.title("Répartition du choix des triplettes pour l'année 2023")
 plt.show()
+
+#afficher la légende
 
 print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
     '2 : HIST.-GEO. GEOPOLITIQUE & SC.POLITIQUES/LANGUES, LITT. ET CULTURES ETRA. ET R./SCIENCES ECONOMIQUES ET SOCIALES',
@@ -239,6 +267,8 @@ print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
     '19 : AUTRES COMBINAISONS',
       sep = '\n')
 # -
+
+# A travers ces graphiques, nous pouvons nous rendre compte que la spécialité Maths/Physique/SVT est largement la spécialité la plus choisie sur ces trois années. En deuxième et troisième places, nous retrouvons les spécialités Histoire-Géo/Langues/SES et Histoire-Géo/Maths/SES (sur les trois années). Finalement, ces résultats nous montrent que les 3 spécialités les plus choisies sur les trois années 2021, 2022 et 2023 ressemblent fortement aux anciennes filières S, ES et L. Nous pouvons alors questionner l'utilité de la réforme du nouveau BAC quant à la possibilité de la diversité 
 
 # ## Triplettes les plus choisies par genre
 
