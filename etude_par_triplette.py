@@ -4,7 +4,7 @@
 
 # Le but de cette étude est d'alors de mettre en lumière des différences sociétales quant aux choix de triplettes plus scientifiques, plus littéraires ou plus économiques, ainsi que la discrimination genrée pour chacune des triplettes.
 
-# ## Étude des triplettes les plus choisies
+# ## Étude des triplettes les plus choisies en moyenne
 
 # Nous allons tout d'abord créer de nouveaux dataframes afin de cibler les informations dont nous avons besoin pour répondre à la question des triplettes les plus choisies en 2021, 2022 et 2023.
 
@@ -175,7 +175,7 @@ labels = {
 }
 
 # +
-#tracer de l'histogramme de l'année 2021
+#tracer l'histogramme de l'année 2021
 
 plt.bar(df_2021bis.columns[1:], frequences_2021[1:]) #on enlève la première valeur correspondant à EFFECTIF TOTAL
 plt.xlabel('Triplette')
@@ -184,7 +184,7 @@ plt.title('Fréquence de la triplette choisie en 2021')
 plt.xticks(df_2021bis.columns[1:], [labels[x] for x in df_2021bis.columns[1:]])
 plt.show()
 
-#tracer de l'histogramme de l'année 2022
+#tracer l'histogramme de l'année 2022
 
 plt.bar(df_2022bis.columns[1:], frequences_2022[1:])
 plt.xlabel('Triplette')
@@ -193,7 +193,7 @@ plt.title('Fréquence de la triplette choisie en 2022')
 plt.xticks(df_2022bis.columns[1:], [labels[x] for x in df_2022bis.columns[1:]])
 plt.show()
 
-#tracer de l'histogramme de l'année 2023
+#tracer l'histogramme de l'année 2023
 
 plt.bar(df_2023bis.columns[1:], frequences_2023[1:])
 plt.xlabel('Triplette')
@@ -226,19 +226,19 @@ print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
       sep = '\n')
 
 # +
-#tracer du camembert pour l'année 2021
+#tracer le camembert pour l'année 2021
 
 plt.pie(frequences_2021[1:], labels = [labels[x] for x in df_2021bis.columns[1:]], startangle = 40)
 plt.title("Répartition du choix des triplettes pour l'année 2021")
 plt.show()
 
-#tracer du camembert pour l'année 2022
+#tracer le camembert pour l'année 2022
 
 plt.pie(frequences_2022[1:], labels = [labels[x] for x in df_2022bis.columns[1:]], startangle = 40)
 plt.title("Répartition du choix des triplettes pour l'année 2022")
 plt.show()
 
-#tracer du camembert pour l'année 2023
+#tracer le camembert pour l'année 2023
 
 plt.pie(frequences_2023[1:], labels = [labels[x] for x in df_2023bis.columns[1:]], startangle = 40)
 plt.title("Répartition du choix des triplettes pour l'année 2023")
@@ -268,40 +268,44 @@ print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
       sep = '\n')
 # -
 
-# A travers ces graphiques, nous pouvons nous rendre compte que la spécialité Maths/Physique/SVT est largement la spécialité la plus choisie sur ces trois années. En deuxième et troisième places, nous retrouvons les spécialités Histoire-Géo/Langues/SES et Histoire-Géo/Maths/SES (sur les trois années). Finalement, ces résultats nous montrent que les 3 spécialités les plus choisies sur les trois années 2021, 2022 et 2023 ressemblent fortement aux anciennes filières S, ES et L. Nous pouvons alors questionner l'utilité de la réforme du nouveau BAC quant à la possibilité de la diversité 
+# A travers ces graphiques, nous pouvons nous rendre compte que la spécialité Maths/Physique/SVT est largement la spécialité la plus choisie sur ces trois années. En deuxième et troisième places, nous retrouvons les spécialités Histoire-Géo/Langues/SES et Histoire-Géo/Maths/SES (sur les trois années). Finalement, ces résultats nous montrent que les 3 spécialités les plus choisies sur les trois années 2021, 2022 et 2023 ressemblent fortement aux anciennes filières S, ES et L. Nous pouvons alors questionner l'utilité de la réforme du nouveau BAC quant à la possibilité de la diversification du choix des spécialités et d'orientation. Cependant, cette réforme a aussi permis à de nombreux élèves de choisir de nouvelles triplettes et diversifier leurs parcours (environ 60% des premières de France).
 
-# ## Triplettes les plus choisies par genre
+# ## Étude des triplettes les plus choisies par genre
+
+# Pour cette partie de l'étude, on va créer deux sous dataframes qui vont recenser les effectifs filles et garçons respectivement.
 
 # ### Triplettes les plus choisies pour les filles
 
+# Dans un premier temps, il faut créer un nouveau dataframe ne comprenant que les données relatives aux filles.
+
 # +
+#création d'un nouveau dataframe
+
 df_filles = df.copy()
-df_filles = df_filles.loc[:,'EFFECTIF TOTAL':]
+df_filles = df_filles.loc[:,'EFFECTIF TOTAL':] #garder les colonnes utiles
 
 i = -1
-L = []
+L = [] #recenser les colonnes à enlever (garçons)
 for name in df_filles.columns:
-    i+=1
-    if 'garçons' in name:
+    i += 1
+    if 'garçons' in name: #toutes les colonnes correspondant aux effectifs des garçons
         L.append(i)
 
 # +
-#on enlève les colonnes qui ne nous intéressent pas
+#enlever les colonnes inutiles
 
 df_filles = df_filles.drop(df_filles.columns[L], axis = 1)
-df_filles = df_filles.drop(['EFFECTIF TOTAL GARCONS', 'EFFECTIF TOTAL'], axis = 1)
+df_filles = df_filles.drop(['EFFECTIF TOTAL GARCONS', 'EFFECTIF TOTAL'], axis = 1) #garder que EFFECTIF FILLES
 # -
 
-display(df_filles.sum(axis = 0).to_frame().T)
+# On additionne ensuite les données par colonne pour faire des moyennes, puis on calcule les fréquences.
 
 # +
-#on calcule les fréquences pour les filles
+#calcul des fréquences pour les filles
 
 serie_filles = df_filles.sum(axis = 0)
-print(serie_filles)
 valeurs_filles = serie_filles.tolist()
 frequences_filles = [x/valeurs_filles[0] for x in valeurs_filles]
-print(frequences_filles)
 
 # +
 df_fillesbis = df_filles.iloc[:,:1].copy()
@@ -317,37 +321,45 @@ df_fillesbis
 
 # ### Triplettes les plus choisies pour les garçons
 
+# Comme précédemment, il faut d'abord créer un nouveau dataframe ne comprenant que les données relatives aux garçons.
+
 # +
+#création d'un nouveau dataframe
+
 df_garcons = df.copy()
-df_garcons = df_garcons.loc[:,'EFFECTIF TOTAL':]
+df_garcons = df_garcons.loc[:,'EFFECTIF TOTAL':] #garder que les colonnes utiles
 
 i = -1
-L = []
+L = [] #recenser les colonnes à enlever (filles)
 for name in df_garcons.columns:
     i+=1
-    if 'filles' in name:
+    if 'filles' in name: #toutes les colonnes correspondant aux effectifs des filles
         L.append(i)
 
 # +
-#on enlève les colonnes qui ne nous intéressent pas
+#enlever les colonnes inutiles
 
 df_garcons = df_garcons.drop(df_garcons.columns[L], axis = 1)
-df_garcons = df_garcons.drop(['EFFECTIF TOTAL FILLES', 'EFFECTIF TOTAL'], axis = 1)
+df_garcons = df_garcons.drop(['EFFECTIF TOTAL FILLES', 'EFFECTIF TOTAL'], axis = 1) #garder que EFFECTIF GARCONS
+# -
+
+# On additionne ensuite les données par colonne pour faire des moyennes, puis on calcule les fréquences.
 
 # +
-#on calcule les fréquences pour les garçons
+#calcul des fréquences pour les garçons
 
 serie_garcons = df_garcons.sum(axis = 0)
 valeurs_garcons = serie_garcons.tolist()
-print(valeurs_garcons)
 frequences_garcons = [x/valeurs_garcons[0] for x in valeurs_garcons]
-print(frequences_garcons)
 # -
 
 # ### Affichage des résultats et comparaison
 
+# Maintenant que nous avons étudié les triplettes les plus choisies en moyenne sur les 3 ans pour les filles et les garçons, on va pouvoir afficher différents résultats graphiques.
+
 # +
-#définition des labels filles et garçons pour mieux voir
+#définition des labels filles et garçons
+
 labels_filles = ['01 - MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE - filles',
     '02 - HIST.-GEO. GEOPOLITIQUE & SC.POLITIQUES/LANGUES, LITT. ET CULTURES ETRA. ET R./SCIENCES ECONOMIQUES ET SOCIALES - filles',
     '03 - HIST.-GEO. GEOPOLITIQUE & SC.POLITIQUES/MATHEMATIQUES/SCIENCES ECONOMIQUES ET SOCIALES - filles',
@@ -410,26 +422,29 @@ labels = ['01 - MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE'
     'AUTRES COMBINAISONS']
 
 # +
-# Données
+#data
+
 categories = labels
-data1 = frequences_filles[1:]  # Premier ensemble de données
-data2 = frequences_garcons[1:]  # Deuxième ensemble de données
+data1 = frequences_filles[1:]  #premier ensemble de données
+data2 = frequences_garcons[1:]  #deuxième ensemble de données
 
-# Création du graphique à barres empilées
-x = np.arange(1, len(categories)+1)  # Position des catégories
+#création graphique à barres empilées
 
-plt.bar(x, data1, label='Filles', color='blue')  # Barres pour le premier ensemble
-plt.bar(x, data2, label='Garçons', color='green', bottom=data1)  # Empilage du deuxième ensemble
+x = np.arange(1, len(categories)+1)  #position des catégories
 
-# Ajout des titres, étiquettes et légendes
+plt.bar(x, data1, label = 'Filles', color = 'blue')  #barres data1
+plt.bar(x, data2, label = 'Garçons', color = 'green', bottom = data1)  #barres data2 (au-dessus du data1)
+
+#ajouter titre et légendes
+
 plt.title('Fréquence des triplettes choisies de 2021 à 2023 pour les filles (bleu) et les garçons (vert)')
 plt.xlabel('Triplette')
 plt.ylabel('Fréquence')
 plt.xticks(x)
-plt.legend()  # Affiche la légende
-
-# Affichage
+plt.legend()
 plt.show()
+
+#afficher la légende
 
 print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
     '2 : HIST.-GEO. GEOPOLITIQUE & SC.POLITIQUES/LANGUES, LITT. ET CULTURES ETRA. ET R./SCIENCES ECONOMIQUES ET SOCIALES',
@@ -453,8 +468,21 @@ print('1 : MATHEMATIQUES/PHYSIQUE-CHIMIE/SCIENCES DE LA VIE ET DE LA TERRE',
       sep = '\n')
 # -
 
-for i in range(19):
+# Ce premier graphique nous permet de voir que de nombreux choix de triplettes sont inégaux entre filles et garçons. Nous allons détailler dans les camemberts ci-dessous la répartition de ces effectifs pour chacune des triplettes.
+
+# +
+#itérer pour chaque triplette
+
+for i in range(18):
+    
     plt.pie([frequences_filles[i+1]/(frequences_filles[i+1]+frequences_garcons[i+1]), frequences_garcons[i+1]/(frequences_filles[i+1]+frequences_garcons[i+1])], labels = [labels_filles[i], labels_garcons[i]], startangle = 40)
-    plt.title(f"Répartition du choix de la triplette {labels[i]} par genre sur les trois années 2021, 2022 et 2023")
+    plt.title(f"Répartition du choix de la triplette {labels[i]} par genre en moyenne sur les trois années 2021, 2022 et 2023")
     plt.show()
     print('----------------------------------------------------------------------------------------------------------------------------','\n','\n', sep = '\n')
+# -
+
+# Nous pouvons voir que les deux choix de triplettes pour lesquelles la proportion de garçons est bien plus importante que la proportion de filles (au moins 80% de garçons) sont Maths/Physique/NSI et Maths/Physique/SI. Ces deux choix de triplettes sont en l'occurence les choix de spécialités les plus "mathématiques". Il faudrait alors plus encourager les filles à prendre des choix de triplettes de ce genre pour rééquilibrer les effectifs.
+
+# Dans l'autre sens, les deux choix de triplettes pour lesquelles la proportion de filles est bien plus importante que la proportion de garçons (au moins 80% de garçons) sont Humanités/Langues/SES et Humanités/Langues/Histoire-Géo. Ces deux choix de triplettes sont en l'occurence les choix de spécialités les plus "littéraires". Il faudrait alors plus encourager les garçons à prendre des choix de triplettes de ce genre pour rééquilibrer les effectifs.
+
+# ### Il est donc primordial d'agir dès le plus jeune âge auprès des jeunes filles pour promouvoir les filières scientifiques et leur montrer qu'elles sont autant capables de réussir que les garçons (c'est un vrai problème sociétal pour lequel il faut agir). De plus, ces différences de choix de triplettes ont de nombreuses répercussions quant aux choix d'études supérieures. En effet, nous pouvons le voir directement en écoles d'ingénieur où la proportion de filles correspond aux chiffres donnés dans cette étude.
