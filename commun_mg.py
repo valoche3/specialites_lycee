@@ -1,3 +1,9 @@
+# # ETUDE DU CHOIX DE SPECIALITES PAR LES ELEVES DE PREMIERE EN FRANCE EN 2021, 2022, 2023
+
+# A travers cette analyse de données sur les choix de spécialités en première tirées du site data.gouv, nous allons mener une étude comparative afin de mettre en lumière des tendances, des caractéristiques sur ces choix des triplettes
+#
+# Nous allons notamment nous pencher sur des comparaisons entre filles et garçons, mais aussi entre lycée public et privé et en fonction du département étudié
+
 import pandas as pd
 import numpy as np
 import geopandas as gpd
@@ -47,8 +53,14 @@ eff_filles_2023 = df_2023['EFFECTIF TOTAL FILLES'].sum()
 print("l'effectif total féminin en 2023 est de", eff_filles_2023, 'eleves')
 eff_garcons_2023 = df_2023['EFFECTIF TOTAL GARCONS'].sum()
 print("l'effectif total masculin en 2023 est de", eff_garcons_2023, 'eleves')
+# -
+# On constate ici que ces effectifs sont relativement constants sur ces trois dernières années
+
+# ## Etude du choix des specialités par filière
+
+# L'objectif ici est de répartir les différentes spécialités par filières (scientifique, littéraire, eco et sociale, art) et voir la répartitions des filles et des garcons dans ces filières
+
 # +
-#l'objectif ici est de répartir les différentes spécialités par filières (scientifique, littéraire, eco et sociale, art) et voir la répartitions des filles et des garcons dans ces filières
 
 #répartition des spes par filière
 liste_spe_lit_filles = ['0105 - HUMANITES, LITTERATURE ET PHILOSOPHIE - filles', '0241 - LITTERATURE ET LCA LATIN - filles', '0242 - LITTERATURE ET LCA GREC - filles', '0300 - LANGUES, LITTERATURE ET CULTURES ETRANGERES ET REGIONALES - filles']
@@ -261,6 +273,9 @@ ax2.set_ylim(y_min, y_max)
 
 plt.tight_layout() 
 plt.show()
+# -
+# On constate que le nombre de filles en littéraire et en éco est bien supérieur à celui des garçons, tandis que les garçons ont plus tendance à choisir des spécilaités scientifiques
+
 # +
 #afficher un tableau à double entrée avec les années et les filières pour les filles et les garçons
 
@@ -289,6 +304,9 @@ tableau_effectif_g = pd.pivot_table(df_g, values='effectifs', index='année', co
 tableau_effectif_f = pd.pivot_table(df_f, values='effectifs', index='année', columns='filières', fill_value=0)
 print("\033[1mEFFECITF DE GARCONS AYANT CHOISI UNE DES SPECIALITES APPARTENANT AUX DIFFERENTES FILIERES PAR ANNEE\033[0m")
 tableau_effectif_g
+# -
+# ## Etude du choix des specialités en fonction du secteur
+
 # +
 #comparaison entre lycée privé et lycée public
 
@@ -315,11 +333,10 @@ prop_prive_23 =  round(eff_tot_prive_23/eff_tot_2023, 2)
 print("La propotion d'élèves dans le privé en 2021 est de", prop_prive_21)
 print("La propotion d'élèves dans le privé en 2022 est de", prop_prive_22)
 print("La propotion d'élèves dans le privé en 2023 est de", prop_prive_23)
+# -
 
 
-# +
-#la proportion d'élèves dans le privé en 2023 ne semble pas très cohérente avec les deux autres valeurs
-#il se peut qu'il y ait des valeurs aberrantes dans le dataframe 
+# La proportion d'élèves dans le privé en 2023 ne semble pas très cohérente avec les deux autres valeurs, il se peut qu'il y ait des valeurs aberrantes dans le dataframe 
 
 # +
 #tracé de l'évolution de la proportion d'élèves dans le privé
@@ -389,66 +406,28 @@ plt.legend()
 # Afficher la figure
 plt.tight_layout()
 plt.show()
-
-# +
-#ETUDE DES TRIPLETTES
-
-#détermination de la triplette la plus choisie par département et affichage sur une carte de France
-# liste des départements
-liste_dep = df_2021['code département'].unique()
-print(liste_dep)
 # -
 
-print(df.dtypes.head(10))
+# ## Etude du choix des specialités par département
 
-# Identifier les colonnes contenant les triplettes pour les filles et les garçons
-triplette_cols_f = df.iloc[:, 55::2] 
-triplette_cols_g = df.iloc[:, 56::2]
-liste_triplette_f = triplette_cols_f.columns.tolist()
-liste_triplette_g = triplette_cols_g.columns.tolist()
+# On va essayer ici de représenter la spécialité la plus choisie parmi les filles et les garçons par département sous forme d'une carte de France avec chaque département de la couleur de la spécialité la plus choisie
+
+# ### EN 2021
+
+# On commence par créer un dictionnaire avec comme clé le numéro du département et comme valeur la spécialité la plus choisie
+
 # +
-# Créer un dictionnaire pour stocker la triplette la plus populaire par département
-triplette_populaire_par_departement_f = {}
-triplette_populaire_par_departement_g = {}
-
-# Parcourir les départements de la liste
-for dep in liste_dep:
-    # Filtrer le DataFrame pour le département actuel
-    df_2021_dep = df_2021[df_2021['code département'] == dep]
-    eff_max_f = 0
-    triplette_max_f = None
-    eff_max_g = 0
-    triplette_max_g = None
-    # Calculer la somme des effectifs pour chaque triplette
-    for triplette in liste_triplette_f:
-        eff = df_2021_dep[triplette].sum()
-        if eff > eff_max_f:
-            eff_max_f = eff
-            triplette_max_f = triplette
-
-    for triplette in liste_triplette_g:
-        eff = df_2021_dep[triplette].sum()
-        if eff > eff_max_g:
-            eff_max_g = eff
-            triplette_max_g = triplette
-    # Stocker le résultat dans le dictionnaire
-    triplette_populaire_par_departement_f[dep] = triplette_max_f
-    triplette_populaire_par_departement_g[dep] = triplette_max_g
-
-# Afficher les triplette populaires pour chaque département
-triplette_populaire_par_departement_g
-# -
-triplette_populaire_par_departement_f
-# +
+#on selectionne les colonnes concernant les filles et les garçons
 spe_cols_f = df.iloc[:, 17::2]
 spe_cols_g = df.iloc[:, 18::2]
 
+#on transforme le nom des colonnes en liste
 liste_spe_f = spe_cols_f.columns.tolist()
 liste_spe_g = spe_cols_g.columns.tolist()
 
-# Créer un dictionnaire pour stocker la triplette la plus populaire par département
-spe_populaire_par_departement_f = {}
-spe_populaire_par_departement_g = {}
+# on crée un dictionnaire pour stocker la spécialité la plus populaire par département
+spe_populaire_par_departement_f_2021 = {}
+spe_populaire_par_departement_g_2021 = {}
 
 # Parcourir les départements de la liste
 for dep in liste_dep:
@@ -458,7 +437,7 @@ for dep in liste_dep:
     spe_max_f = None
     eff_max_g = 0
     spe_max_g = None
-    # Calculer la somme des effectifs pour chaque triplette
+    # Calculer la somme des effectifs pour chaque spécialité
     for spe in liste_spe_f:
         eff = df_2021_dep[spe].sum()
         if eff > eff_max_f:
@@ -471,11 +450,16 @@ for dep in liste_dep:
             eff_max_g = eff
             spe_max_g = spe
     # Stocker le résultat dans le dictionnaire
-    spe_populaire_par_departement_f[dep] = spe_max_f
-    spe_populaire_par_departement_g[dep] = spe_max_g
+    spe_populaire_par_departement_f_2021[dep] = spe_max_f
+    spe_populaire_par_departement_g_2021[dep] = spe_max_g
 
-# Afficher les triplette populaires pour chaque département
+# Afficher les spécialités populaires pour chaque département
 spe_populaire_par_departement_f
+# -
+
+# On utilise ensuite une carte geojson et on associe les clés et le numéro de département pour colorer la carte
+
+# ### AFFICHAGE POUR LES FILLES
 
 # +
 # Charger les données géographiques des départements français
@@ -484,7 +468,7 @@ departments = gpd.read_file(url)
 departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
 
 # Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
-departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f)
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f_2021)
 
 # Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
 departments['specialty'] = departments['specialty'].fillna('Inconnu')
@@ -506,52 +490,317 @@ fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
 departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
 
-# Ajouter une légende
+# on ajoute une légende
 for specialty, color in color_map.items():
     ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
 ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
 
-# Ajouter un titre
-plt.title("Spécialité la plus choisie parmi les filles par département", fontsize=16)
-plt.show()
-
-# +
-# Charger les données géographiques des départements français
-url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
-departments = gpd.read_file(url)
-departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
-
-# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
-departments['specialty'] = departments['code'].map(spe_populaire_par_departement_g)
-
-# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
-departments['specialty'] = departments['specialty'].fillna('Inconnu')
-
-# Associer une couleur unique à chaque spécialité
-unique_specialties = departments['specialty'].unique()
-# Utiliser une palette qualitative de Seaborn
-palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
-color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
-
-# Ajouter une couleur par défaut pour "Inconnu"
-color_map['Inconnu'] = 'lightgrey'
-
-# Ajouter une colonne de couleurs
-departments['color'] = departments['specialty'].map(color_map)
-
-# Tracer la carte
-fig, ax = plt.subplots(1, 1, figsize=(15, 15))
-departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
-departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
-
-# Ajouter une légende
-for specialty, color in color_map.items():
-    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
-ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
-
-# Ajouter un titre
-plt.title("Spécialité la plus choisie parmi les filles par département", fontsize=16)
+# on ajoute un titre
+plt.title("Spécialité la plus choisie parmi les filles par département en 2021", fontsize=16)
 plt.show()
 # -
+
+# ### AFFICHAGE POUR LES GARCONS
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_g_2021)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# Ajouter une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# Ajouter un titre
+plt.title("Spécialité la plus choisie parmi les garçons par département en 2021", fontsize=16)
+plt.show()
+# -
+# ### EN 2022
+
+# +
+# on crée un dictionnaire pour stocker la spécialité la plus populaire par département
+spe_populaire_par_departement_f_2022 = {}
+spe_populaire_par_departement_g_2022 = {}
+
+# Parcourir les départements de la liste
+for dep in liste_dep:
+    # Filtrer le DataFrame pour le département actuel
+    df_2022_dep = df_2022[df_2022['code département'] == dep]
+    eff_max_f = 0
+    spe_max_f = None
+    eff_max_g = 0
+    spe_max_g = None
+    # Calculer la somme des effectifs pour chaque spécialité
+    for spe in liste_spe_f:
+        eff = df_2022_dep[spe].sum()
+        if eff > eff_max_f:
+            eff_max_f = eff
+            spe_max_f = spe
+
+    for spe in liste_spe_g:
+        eff = df_2022_dep[spe].sum()
+        if eff > eff_max_g:
+            eff_max_g = eff
+            spe_max_g = spe
+    # Stocker le résultat dans le dictionnaire
+    spe_populaire_par_departement_f_2022[dep] = spe_max_f
+    spe_populaire_par_departement_g_2022[dep] = spe_max_g
+# -
+
+
+# ### AFFICHAGE POUR LES FILLES
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f_2022)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# on ajoute une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# on ajoute un titre
+plt.title("Spécialité la plus choisie parmi les filles par département en 2021", fontsize=16)
+plt.show()
+# -
+
+
+# ### AFFICHAGE POUR LES GARCONS
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f_2022)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# on ajoute une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# on ajoute un titre
+plt.title("Spécialité la plus choisie parmi les filles par département en 2022", fontsize=16)
+plt.show()
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_g_2022)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# on ajoute une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# on ajoute un titre
+plt.title("Spécialité la plus choisie parmi les garçons par département en 2022", fontsize=16)
+plt.show()
+
+# +
+# on crée un dictionnaire pour stocker la spécialité la plus populaire par département
+spe_populaire_par_departement_f_2023 = {}
+spe_populaire_par_departement_g_2023 = {}
+
+# Parcourir les départements de la liste
+for dep in liste_dep:
+    # Filtrer le DataFrame pour le département actuel
+    df_2023_dep = df_2023[df_2023['code département'] == dep]
+    eff_max_f = 0
+    spe_max_f = None
+    eff_max_g = 0
+    spe_max_g = None
+    # Calculer la somme des effectifs pour chaque spécialité
+    for spe in liste_spe_f:
+        eff = df_2023_dep[spe].sum()
+        if eff > eff_max_f:
+            eff_max_f = eff
+            spe_max_f = spe
+
+    for spe in liste_spe_g:
+        eff = df_2023_dep[spe].sum()
+        if eff > eff_max_g:
+            eff_max_g = eff
+            spe_max_g = spe
+    # Stocker le résultat dans le dictionnaire
+    spe_populaire_par_departement_f_2023[dep] = spe_max_f
+    spe_populaire_par_departement_g_2023[dep] = spe_max_g
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_f_2023)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# on ajoute une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# on ajoute un titre
+plt.title("Spécialité la plus choisie parmi les filles par département en 2023", fontsize=16)
+plt.show()
+
+# +
+# Charger les données géographiques des départements français
+url = "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements.geojson"
+departments = gpd.read_file(url)
+departments['code'] = departments['code'].apply(lambda x: x.zfill(3))
+
+# Ajouter une colonne 'specialty' au GeoDataFrame en fonction du dictionnaire
+departments['specialty'] = departments['code'].map(spe_populaire_par_departement_g_2023)
+
+# Traiter les départements sans spécialité : leur attribuer "Inconnu" ou une couleur par défaut
+departments['specialty'] = departments['specialty'].fillna('Inconnu')
+
+# Associer une couleur unique à chaque spécialité
+unique_specialties = departments['specialty'].unique()
+# Utiliser une palette qualitative de Seaborn
+palette = sns.color_palette("Set2", n_colors=len(unique_specialties))  # Palette douce et distincte
+color_map = {specialty: color for specialty, color in zip(unique_specialties, palette)}
+
+# Ajouter une couleur par défaut pour "Inconnu"
+color_map['Inconnu'] = 'lightgrey'
+
+# Ajouter une colonne de couleurs
+departments['color'] = departments['specialty'].map(color_map)
+
+# Tracer la carte
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+departments.boundary.plot(ax=ax, linewidth=0.5, color='black')  # Tracer les bordures
+departments.plot(ax=ax, color=departments['color'])  # Remplir les départements
+
+# on ajoute une légende
+for specialty, color in color_map.items():
+    ax.plot([], [], color=color, label=specialty, marker='o', linestyle='')  # Ajouter une légende
+ax.legend(title="Spécialité", loc="upper left", fontsize=9, title_fontsize=10, bbox_to_anchor=(1, 1))
+
+# on ajoute un titre
+plt.title("Spécialité la plus choisie parmi les garçons par département en 2023", fontsize=16)
+plt.show()
+# -
+
+# On constate à travers ces cartes que chaque année les garçons choissisent en majorité la spécialité mathématiques, tandis que bien que la majorité des filles choissisent aussi cette spécilaité, c'est un peu plus varié puisque qu'elles sont nombreuses à choisir SES ou SVT. 
+
+# # A travers cette étude, on constate que les spécialités scientifiques sont encore majoritairement choisies par les garçons tandis que les filles sont plus orientées vers des spécialités littéraires ou économiques. Il semble donc important de promouvoir les spécialités scientifiques dans ces classes là pour les filles ainsi que les spécialités littéraires pour les garçons afin de rééquilibrer les effectifs dans chaque filière. 
 
 
